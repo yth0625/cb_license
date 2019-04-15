@@ -12,7 +12,7 @@ const mattermostServer = 'https://chat.architectgroup.com';
 app.post('/cb_license', (req, res) => {
     const {trigger_id} = req.body;
     const payload = {
-        trigger_id: '',
+        trigger_id: trigger_id,
         url: `${botServer}/issued`,
         dialog: {
             title: 'cb-license',
@@ -77,10 +77,25 @@ app.post('/cb_license', (req, res) => {
                     optional: false,
                 }
             ],
-            submit_label: 'Create',
-            notify_on_cancel: false,
+            submit_label: 'OK'
         }
     }
+
+    let options = {
+        headers: {
+           'Authorization': `Bearer ${token}` 
+        },
+        method: 'POST',
+        body: JSON.stringify(payload)
+    };
+
+    fetch(`${mattermostServer}/api/v4/actions/dialogs/open`, options)
+        .then(res => res.json())
+        .then(json => {
+            console.log(json)
+            res.send();
+        })
+        .catch(err => res.send({ ephemeral_text: '에러 발생: ' + err }));
 });
 
 app.listen(port, () => console.log('app listening on port ' + port));
