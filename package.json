@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/yth0625/cb_license#readme",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "node-fetch": "^2.3.0"
   }
 }
