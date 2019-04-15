@@ -9,6 +9,9 @@ const botServer = `http://115.178.77.137:${port}`;
 const token = 'sz7errj5ypgsbn885bbg1wd1na';
 const mattermostServer = 'https://chat.architectgroup.com';
 
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({'extended': 'true'}))
+
 app.post('/cb_license', (req, res) => {
     const {trigger_id} = req.body;
     const payload = {
