@@ -45,6 +45,7 @@ app.post('/cb_license', (req, res) => {
                     display_name: 'License Type',
                     name: 'licenseType',
                     type: 'select',
+                    placeholder: 'Select license type',
                     optional: false,
                     options:[
                         {
