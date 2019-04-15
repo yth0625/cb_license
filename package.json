@@ -1,0 +1,22 @@
+{
+  "name": "cb_license",
+  "version": "1.0.0",
+  "description": "Mattermost에서 발급받는 Slexn용 codeBeamer licnse 발급기",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yth0625/cb_license.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yth0625/cb_license/issues"
+  },
+  "homepage": "https://github.com/yth0625/cb_license#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
