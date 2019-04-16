@@ -8,6 +8,7 @@ const port =  process.env.cb_licnese_bot_port | '5555';
 const botServer = `http://115.178.77.137:${port}`;
 const token = 'sz7errj5ypgsbn885bbg1wd1na';
 const mattermostServer = 'https://chat.architectgroup.com';
+const cbLicenseServer = 'http://115.178.77.223:8081/cb/api/createLicense';
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({'extended': 'true'}))
@@ -102,4 +103,22 @@ app.post('/cb_license', (req, res) => {
         .catch(err => res.send({ ephemeral_text: '에러 발생: ' + err }));
 });
 
-app.listen(port, () => console.log('app listening on port ' + port));
+app.post('/issued', (req, res) => {
+    const {submission} = req.body;
+
+    let options = {
+        method: 'POST',
+        body: JSON.stringify(submission)
+    };
+
+    fetch(cbLicenseServer, options)
+        .then(res => res.json())
+        .then(json => {
+            console.log(json)
+            res.send();
+        })
+        .catch(err => console.log(err));
+
+});
+
+app.listen(port, () => console.log('app listening on port ' + port)); 
