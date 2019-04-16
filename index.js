@@ -30,7 +30,7 @@ app.post('/cb_license', (req, res) => {
                 },
                 {
                     display_name: 'Company Name',
-                    name: 'companyName',
+                    name: 'company',
                     type: 'text',
                     default: 'SLEXN',
                     optional: false,
