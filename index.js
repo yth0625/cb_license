@@ -107,18 +107,16 @@ app.post('/issued', (req, res) => {
     const {submission} = req.body;
 
     let options = {
+        headers: {
+            'Content-Type': 'application/json' 
+        },
         method: 'POST',
         body: JSON.stringify(submission)
     };
 
     fetch(cbLicenseServer, options)
-        .then(res => res.json())
-        .then(json => {
-            console.log(json)
-            res.send();
-        })
-        .catch(err => console.log(err));
-
+        .then(res => console.log(res))
+        .catch(err => console.log(JSON.parse(err)))
 });
 
 app.listen(port, () => console.log('app listening on port ' + port)); 
