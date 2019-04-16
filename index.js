@@ -69,7 +69,7 @@ app.post('/cb_license', (req, res) => {
                 },
                 {
                     display_name: 'Named User',
-                    name: 'nameUser',
+                    name: 'namedUser',
                     type: 'text',
                     placeholder: 'Named 라이센스 수를 입력해주세요.',
                     optional: false,
