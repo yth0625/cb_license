@@ -17,6 +17,12 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({'extended': 'true'}))
 
 app.post('/cb_license', (req, res) => {
+
+    if(req.body.channel_id !== mattermostChannel) {
+        res.send({response_type: 'in_channel', text: '해당 봇은 코드비머 라이센스 발급 채널에서만 사용 가능합니다.'});
+        return;
+    }
+
     const {trigger_id} = req.body;
     const payload = {
         trigger_id: trigger_id,
@@ -100,7 +106,6 @@ app.post('/cb_license', (req, res) => {
     fetch(`${mattermostServer}/api/v4/actions/dialogs/open`, options)
         .then(res => res.json())
         .then(json => {
-            console.log(json)
             res.send();
         })
         .catch(err => res.send({ ephemeral_text: '에러 발생: ' + err }));
@@ -118,8 +123,26 @@ app.post('/issued', (req, res) => {
     };
 
     fetch(cbLicenseServer, options)
-        .then(res => console.log(res))
-        .catch(err => console.log(JSON.parse(err)))
+        .then(res => res.text())
+        .then(data => {
+            options.headers.Authorization = `Bearer ${token}`;
+
+            if (data.fieldErrors) {
+                options.body = JSON.stringify({
+                    channel_id: mattermostChannel,
+                    message: Object.values(err.fieldErrors).join()
+                });
+            } else {
+                options.body = JSON.stringify({
+                    channel_id: mattermostChannel,
+                    message: '코드비머 라이센스: \n  ```\n' + data + '```\n'
+                });
+            }
+            fetch(`${mattermostServer}/api/v4/posts`, options)
+                .catch(err => console.log(err));
+        })
+
+    res.send();
 });
 
 app.listen(port, () => console.log('app listening on port ' + port)); 
