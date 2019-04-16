@@ -5,10 +5,13 @@ const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 
 const port =  process.env.cb_licnese_bot_port | '5555';
-const botServer = `http://115.178.77.137:${port}`;
-const token = 'sz7errj5ypgsbn885bbg1wd1na';
-const mattermostServer = 'https://chat.architectgroup.com';
-const cbLicenseServer = 'http://115.178.77.223:8081/cb/api/createLicense';
+
+const mattermostChannel = '';
+const token = '';
+
+const botServer = ``;
+const mattermostServer = '';
+const cbLicenseServer = '';
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({'extended': 'true'}))
@@ -51,19 +54,19 @@ app.post('/cb_license', (req, res) => {
                     options:[
                         {
                            text:"ALM",
-                           value:"alm"
+                           value:"ALM"
                         },
                         {
                             text:"Collab",
-                            value:"collab"
+                            value:"Collab"
                         },
                         {
                             text:"RM",
-                            value:"rm"
+                            value:"RM"
                         },
                         {
                             text:"QA-Test",
-                            value:"qa-test"
+                            value:"QA-Test"
                         }
                      ]
                 },
