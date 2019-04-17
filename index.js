@@ -12,6 +12,7 @@ const token = '';
 const botServer = ``;
 const mattermostServer = '';
 const cbLicenseServer = '';
+const webhookUrl = `${mattermostServer}/hooks/`;
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({'extended': 'true'}))
@@ -104,10 +105,7 @@ app.post('/cb_license', (req, res) => {
     };
 
     fetch(`${mattermostServer}/api/v4/actions/dialogs/open`, options)
-        .then(res => res.json())
-        .then(json => {
-            res.send();
-        })
+        .then(res => res.send())
         .catch(err => res.send({ ephemeral_text: '에러 발생: ' + err }));
 });
 
@@ -123,23 +121,44 @@ app.post('/issued', (req, res) => {
     };
 
     fetch(cbLicenseServer, options)
-        .then(res => res.text())
+        .then(resp => resp.json())
         .then(data => {
             options.headers.Authorization = `Bearer ${token}`;
 
-            if (data.fieldErrors) {
+            if (data.licenseCode) {
                 options.body = JSON.stringify({
-                    channel_id: mattermostChannel,
-                    message: Object.values(err.fieldErrors).join()
-                });
+                    username: 'codeBeamer',
+                    icon_url: 'https://codebeamer.com/cb/urlversioned/7.5.0-201501081113/images/newskin/login_page/logo_cb.png',
+                    attachments: [{
+                        title: `${submission.company} 의 코드비머 라이센스 발급이 완료 되었습니다.`,
+                        fields: [
+                            {
+                                short: true,
+                                title: '만료일',
+                                value: submission.expiredDate 
+                            },
+                            {
+                                short: false,
+                                title: '라이센스 코드',
+                                value: data.licenseCode
+                            }
+                        ]
+                    }]
+                })
+
+                fetch(webhookUrl, options)
+                    .then(res => console.log(res))
+                    .catch(err => console.log(err));
             } else {
                 options.body = JSON.stringify({
-                    channel_id: mattermostChannel,
-                    message: '코드비머 라이센스: \n  ```\n' + data + '```\n'
-                });
+                    username: 'codeBeamer',
+                    icon_url: 'https://codebeamer.com/cb/urlversioned/7.5.0-201501081113/images/newskin/login_page/logo_cb.png',
+                    text: `필드 값을 잘못입력하셨습니다.`
+                })
+                fetch(webhookUrl, options)
+                    .then(res => console.log(res))
+                    .catch(err => console.log(err));
             }
-            fetch(`${mattermostServer}/api/v4/posts`, options)
-                .catch(err => console.log(err));
         })
 
     res.send();
