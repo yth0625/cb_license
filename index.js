@@ -90,6 +90,14 @@ app.post('/cb_license', (req, res) => {
                     type: 'text',
                     placeholder: 'Floating 라이센스 수를 입력해주세요.',
                     optional: false,
+                },
+                {
+                    display_name: 'Addtion Options',
+                    name: 'adtionOptions',
+                    type: 'text',
+                    default: 'TTTTTTT',
+                    help_text: "Servide Desk, Document Review, Variant Management, Escalator, Tracking, Doors bridge, Jira integration 순서입니다. T = true, F = false",
+                    optional: false,
                 }
             ],
             submit_label: 'OK'
