@@ -81,14 +81,16 @@ app.post('/cb_license', (req, res) => {
                     display_name: 'Named User',
                     name: 'namedUser',
                     type: 'text',
-                    placeholder: 'Named 라이센스 수를 입력해주세요.',
+                    default: 0,
+                    help_text: 'Named 라이센스 수를 입력해주세요.',
                     optional: false,
                 },
                 {
                     display_name: 'Floating User',
                     name: 'floatingUser',
                     type: 'text',
-                    placeholder: 'Floating 라이센스 수를 입력해주세요.',
+                    default: 0,
+                    help_text: 'Floating 라이센스 수를 입력해주세요.',
                     optional: false,
                 },
                 {
