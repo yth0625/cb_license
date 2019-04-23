@@ -2,7 +2,8 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
-const fetch = require('node-fetch');
+const rp = require('request-promise');
+const dateFormat = require('dateformat');
 
 const port =  process.env.cb_licnese_bot_port | '5555';
 
@@ -104,17 +105,18 @@ app.post('/cb_license', (req, res) => {
             ],
             submit_label: 'OK'
         }
-    }
+    };
 
     let options = {
+        url: `${mattermostServer}/api/v4/actions/dialogs/open`,
         headers: {
            'Authorization': `Bearer ${token}` 
         },
         method: 'POST',
-        body: JSON.stringify(payload)
+        json: payload
     };
 
-    fetch(`${mattermostServer}/api/v4/actions/dialogs/open`, options)
+    rp(options)
         .then(res => res.send())
         .catch(err => res.send({ ephemeral_text: '에러 발생: ' + err }));
 });
@@ -123,49 +125,71 @@ app.post('/issued', (req, res) => {
     const {submission} = req.body;
 
     let options = {
+        url: cbLicenseServer,
         headers: {
             'Content-Type': 'application/json' 
         },
         method: 'POST',
-        body: JSON.stringify(submission)
+        json: submission
     };
 
-    fetch(cbLicenseServer, options)
-        .then(resp => resp.json())
+    rp(options)
         .then(data => {
-            options.headers.Authorization = `Bearer ${token}`;
+            let now = new Date();
+            const fileName = dateFormat(now, 'yyyymmdd') + 
+                (submission.namedUser > 0 ? '_N_' + submission.namedUser : '_F_' + submission.floatingUser) + '_' + submission.hostId + '.txt';
 
             if (data.licenseCode) {
-                options.body = JSON.stringify({
-                    username: 'codeBeamer',
-                    icon_url: 'https://codebeamer.com/cb/urlversioned/7.5.0-201501081113/images/newskin/login_page/logo_cb.png',
-                    attachments: [{
-                        title: `${submission.company} 의 코드비머 라이센스 발급이 완료 되었습니다.`,
-                        fields: [
-                            {
-                                short: true,
-                                title: '만료일',
-                                value: submission.expiredDate 
-                            },
-                            {
-                                short: false,
-                                title: '라이센스 코드',
-                                value: data.licenseCode
-                            }
-                        ]
-                    }]
-                })
+                    options.url = mattermostServer + '/api/v4/files';
+                    options.headers.Authorization = `Bearer ${token}`;
+                    options.headers['Content-Type'] = 'multipart/form-data;';
+                    delete options.json;
+                    options.json = true;
 
-                fetch(webhookUrl, options)
-                    .then(res => console.log(res))
-                    .catch(err => console.log(err));
+                    options.formData = { 
+                        files: { 
+                            value: data.licenseCode,
+                            options: { filename: fileName, contentType: null } 
+                        },
+                        channel_id: mattermostChannel 
+                    };
+
+                    rp(options)
+                        .then(data => {
+                            const file_id = data.file_infos[0].id;
+                            options.headers['Content-Type'] = 'application/json';
+                            delete options.formDate
+                            options.json = {
+                                username: 'codeBeamer',
+                                icon_url: 'https://codebeamer.com/cb/urlversioned/7.5.0-201501081113/images/newskin/login_page/logo_cb.png',
+                                attachments: [{
+                                    title: `${submission.company} 의 코드비머 라이센스 발급이 완료 되었습니다.`,
+                                    fields: [
+                                        {
+                                            short: true,
+                                            title: '만료일',
+                                            value: submission.expiredDate 
+                                        }
+                                    ]
+                                }],
+                                file_ids: [file_id]
+                            };
+                            
+                            options.url = webhookUrl;
+
+                            rp(options)
+                                .then(res => console.log(res))
+                                .catch(err => console.log(err));
+                        })
             } else {
-                options.body = JSON.stringify({
+                options.json = {
                     username: 'codeBeamer',
                     icon_url: 'https://codebeamer.com/cb/urlversioned/7.5.0-201501081113/images/newskin/login_page/logo_cb.png',
                     text: `필드 값을 잘못입력하셨습니다.`
-                })
-                fetch(webhookUrl, options)
+                };
+                options.url = webhookUrl;
+
+                rp(options)
                     .then(res => console.log(res))
                     .catch(err => console.log(err));
             }
