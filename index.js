@@ -136,8 +136,9 @@ app.post('/issued', (req, res) => {
     rp(options)
         .then(data => {
             let now = new Date();
+            const licenseType =  (submission.namedUser > 0 ? true : false)
             const fileName = dateFormat(now, 'yyyymmdd') + 
-                (submission.namedUser > 0 ? '_N_' + submission.namedUser : '_F_' + submission.floatingUser) + '_' + submission.hostId + '.txt';
+                (licenseType ? '_N_' + submission.namedUser : '_F_' + submission.floatingUser) + '_' + submission.hostId + '.txt';
 
             if (data.licenseCode) {
                     options.url = mattermostServer + '/api/v4/files';
@@ -156,43 +157,55 @@ app.post('/issued', (req, res) => {
 
                     rp(options)
                         .then(data => {
-                            const file_id = data.file_infos[0].id;
+                            const fileID = data.file_infos[0].id;
                             options.headers['Content-Type'] = 'application/json';
-                            delete options.formDate
+                            delete options.formData
+                            options.url = mattermostServer + '/api/v4/posts';
                             options.json = {
-                                username: 'codeBeamer',
-                                icon_url: 'https://codebeamer.com/cb/urlversioned/7.5.0-201501081113/images/newskin/login_page/logo_cb.png',
-                                attachments: [{
-                                    title: `${submission.company} 의 코드비머 라이센스 발급이 완료 되었습니다.`,
-                                    fields: [
-                                        {
-                                            short: true,
-                                            title: '만료일',
-                                            value: submission.expiredDate 
-                                        }
-                                    ]
-                                }],
-                                file_ids: [file_id]
-                            };
-                            
-                            options.url = webhookUrl;
+                                channel_id: "yuwf94613tfatxuypoagkrxn7a",
+                                file_ids: [fileID],
+                                props: {
+                                    attachments: [
+                                            {
+                                                title: submission.company + " 의 코드비머 라이센스 발급이 완료 되었습니다.",
+                                                fields: [
+                                                    {
+                                                        title: "만료일",
+                                                        value: submission.expiredDate,
+                                                        short: true
+                                                    },
+                                                    licenseType ? {
+                                                        title: "라이센스 타입",
+                                                        value: "namedLicense " + submission.namedUser,
+                                                        short: true
+                                                    } : {
+                                                        title: "라이센스 타입",
+                                                        value: "floatingLicense " + submission.floatingUser,
+                                                        short: true
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                }
+                            }
 
                             rp(options)
                                 .then(res => console.log(res))
                                 .catch(err => console.log(err));
                         })
-            } else {
-                options.json = {
-                    username: 'codeBeamer',
-                    icon_url: 'https://codebeamer.com/cb/urlversioned/7.5.0-201501081113/images/newskin/login_page/logo_cb.png',
-                    text: `필드 값을 잘못입력하셨습니다.`
-                };
-                options.url = webhookUrl;
+            } 
+            // else {
+            //     options.json = {
+            //         username: 'codeBeamer',
+            //         icon_url: 'https://codebeamer.com/cb/urlversioned/7.5.0-201501081113/images/newskin/login_page/logo_cb.png',
+            //         text: `필드 값을 잘못입력하셨습니다.`
+            //     };
+            //     options.url = webhookUrl;
 
-                rp(options)
-                    .then(res => console.log(res))
-                    .catch(err => console.log(err));
-            }
+            //     rp(options)
+            //         .then(res => console.log(res))
+            //         .catch(err => console.log(err));
+            // }
         })
 
     res.send();
