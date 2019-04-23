@@ -13,7 +13,6 @@ const token = '';
 const botServer = ``;
 const mattermostServer = '';
 const cbLicenseServer = '';
-const webhookUrl = `${mattermostServer}/hooks/`;
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({'extended': 'true'}))
@@ -161,7 +160,7 @@ app.post('/issued', (req, res) => {
                             delete options.formData
                             options.url = mattermostServer + '/api/v4/posts';
                             options.json = {
-                                channel_id: "yuwf94613tfatxuypoagkrxn7a",
+                                channel_id: mattermostChannel,
                                 file_ids: [fileID],
                                 props: {
                                     attachments: [
@@ -194,21 +193,23 @@ app.post('/issued', (req, res) => {
                                 .catch(err => console.log(err));
                         })
             } 
-            // else {
-            //     options.json = {
-            //         username: 'codeBeamer',
-            //         icon_url: 'https://codebeamer.com/cb/urlversioned/7.5.0-201501081113/images/newskin/login_page/logo_cb.png',
-            //         text: `필드 값을 잘못입력하셨습니다.`
-            //     };
-            //     options.url = webhookUrl;
+            else {
+                const errorMessages = Object.values(data.fieldErrors).map(a => a + "\n").join().replace(/,/g, '');
 
-            //     rp(options)
-            //         .then(res => console.log(res))
-            //         .catch(err => console.log(err));
-            // }
+                options.url = mattermostServer + '/api/v4/posts';
+                options.headers.Authorization = `Bearer ${token}`;
+                options.json = {
+                    channel_id: mattermostChannel,
+                    message: errorMessages
+                };
+
+                rp(options)
+                    .then(res => console.log(res))
+                    .catch(err => console.log(err));
+            }
         })
 
     res.send();
 });
 
-app.listen(port, () => console.log('app listening on port ' + port)); 
+app.listen(port, () => console.log('app listening on port ' + port));
