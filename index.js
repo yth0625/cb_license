@@ -136,7 +136,7 @@ app.post('/issued', (req, res) => {
         .then(data => {
             let now = new Date();
             const fileName = dateFormat(now, 'yyyymmdd') + 
-                (submission.namedUser > 0 ? '_N_' + submission.namedUser : '') + (submission.floatingUser > 0 ? '_F_' + submission.namedUser : '') + '_' + submission.hostId + '.txt';
+                (submission.namedUser > 0 ? '_N_' + submission.namedUser : '') + (submission.floatingUser > 0 ? '_F_' + submission.floatingUser : '') + '_' + submission.hostId + '.txt';
 
             if (data.licenseCode) {
                     options.url = mattermostServer + '/api/v4/files';
