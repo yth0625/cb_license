@@ -98,7 +98,7 @@ app.post('/cb_license', (req, res) => {
                     name: 'additionOptions',
                     type: 'text',
                     default: 'TTTTTTT',
-                    help_text: "Variant Management, Document Review, Service Desk, Escalation, Branching, Doors bridge, Jira integration 순서입니다. T = true, F = false (대문자로만 작성 해주세요)",
+                    help_text: "Variant Management, Document Review, Service Desk, Escalation, Branching, Doors bridge, Jira integration 순서입니다. T = true, F = false",
                     optional: false,
                 }
             ],
