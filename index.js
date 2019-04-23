@@ -136,9 +136,8 @@ app.post('/issued', (req, res) => {
     rp(options)
         .then(data => {
             let now = new Date();
-            const licenseType =  (submission.namedUser > 0 ? true : false)
             const fileName = dateFormat(now, 'yyyymmdd') + 
-                (licenseType ? '_N_' + submission.namedUser : '_F_' + submission.floatingUser) + '_' + submission.hostId + '.txt';
+                (submission.namedUser > 0 ? '_N_' + submission.namedUser : '') + (submission.floatingUser > 0 ? '_F_' + submission.namedUser : '') + '_' + submission.hostId + '.txt';
 
             if (data.licenseCode) {
                     options.url = mattermostServer + '/api/v4/files';
@@ -172,15 +171,16 @@ app.post('/issued', (req, res) => {
                                                     {
                                                         title: "만료일",
                                                         value: submission.expiredDate,
+                                                        short: false
+                                                    },
+                                                    {
+                                                        title: "Named License 인원",
+                                                        value: submission.namedUser,
                                                         short: true
                                                     },
-                                                    licenseType ? {
-                                                        title: "라이센스 타입",
-                                                        value: "namedLicense " + submission.namedUser,
-                                                        short: true
-                                                    } : {
-                                                        title: "라이센스 타입",
-                                                        value: "floatingLicense " + submission.floatingUser,
+                                                    {
+                                                        title: "Floating Licnese 인원",
+                                                        value: submission.floatingUser,
                                                         short: true
                                                     }
                                                 ]
