@@ -134,8 +134,12 @@ app.post('/issued', (req, res) => {
 
     rp(options)
         .then(data => {
-            let now = new Date();
-            let fileName = (dateFormat(now, 'yyyymmdd') + 
+            const year = submission.expiredDate.substring(0,4); 
+            const month = submission.expiredDate.substring(4,6); 
+            const day = submission.expiredDate.substring(6,8);
+            const expiredDate = new Date(year, month, day);
+            
+            let fileName = (dateFormat(expiredDate, 'yyyymmdd') + 
                 (submission.namedUser > 0 ? '_N_' + submission.namedUser : '') + (submission.floatingUser > 0 ? '_F_' + submission.floatingUser : '') + '_' + submission.hostId + '.txt').replace(/-/g, '_');
 
             if (data.licenseCode) {
