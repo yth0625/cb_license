@@ -140,7 +140,7 @@ app.post('/issued', (req, res) => {
             const expiredDate = new Date(year, month - 1, day);
             
             let fileName = (dateFormat(expiredDate, 'yyyymmdd') + 
-                (submission.namedUser > 0 ? '_N_' + submission.namedUser : '') + (submission.floatingUser > 0 ? '_F_' + submission.floatingUser : '') + '_' + submission.hostId + '.txt').replace(/-/g, '_');
+                (submission.namedUser > 0 ? '_N_' + submission.namedUser : '') + (submission.floatingUser > 0 ? '_F_' + submission.floatingUser : '') + '_' + submission.hostId + '.txt').replace(/-/g, '_').replace(/:/g, '_');
 
             if (data.licenseCode) {
                     options.url = mattermostServer + '/api/v4/files';
