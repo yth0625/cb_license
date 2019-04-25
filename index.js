@@ -163,6 +163,17 @@ app.post('/issued', (req, res) => {
                             options.headers['Content-Type'] = 'application/json';
                             delete options.formData
                             options.url = mattermostServer + '/api/v4/posts';
+
+                            let additionOptionsText = '';
+                            const additionOptionsArray =  ['Variant Management', 'Document Review', 'Service Desk', 'Escalation', 'Branching', 'Doors bridge', 'Jira integration'];
+                            
+                            for (let index = 0; index < additionOptionsArray.length; index++) {
+                                if (submission.additionOptions[index].toLowerCase() === 't')
+                                    additionOptionsText += additionOptionsArray[index] + ', '
+                            }
+
+                            additionOptionsText = additionOptionsText.slice(0, -2);
+                            
                             options.json = {
                                 channel_id: mattermostChannel,
                                 file_ids: [fileID],
@@ -185,6 +196,11 @@ app.post('/issued', (req, res) => {
                                                         title: "Floating Licnese 인원",
                                                         value: submission.floatingUser,
                                                         short: true
+                                                    },
+                                                    {
+                                                        title: "Addtional Options",
+                                                        value: additionOptionsText,
+                                                        short: false
                                                     }
                                                 ]
                                             }
