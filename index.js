@@ -35,7 +35,7 @@ app.post('/cb_license', (req, res) => {
                     display_name: 'Host-ID',
                     name: 'hostId',
                     type: 'text',
-                    placeholder: '[LIN/WIN-Mac address] 형태로 입력해주세요',
+                    placeholder: '[LIN/WIN-Mac address] 형태로 입력해주세요', 
                     optional: false,
                 },
                 {
@@ -143,75 +143,88 @@ app.post('/issued', (req, res) => {
                 (submission.namedUser > 0 ? '_N_' + submission.namedUser : '') + (submission.floatingUser > 0 ? '_F_' + submission.floatingUser : '') + '_' + submission.hostId + '.txt').replace(/-/g, '_').replace(/:/g, '_');
 
             if (data.licenseCode) {
-                    options.url = mattermostServer + '/api/v4/files';
-                    options.headers.Authorization = `Bearer ${token}`;
-                    options.headers['Content-Type'] = 'multipart/form-data;';
-                    delete options.json;
-                    options.json = true;
+                const {licenseCode} = data; 
+                options.url = mattermostServer + '/api/v4/users/ids';
+                options.headers.Authorization = `Bearer ${token}`;
+                options.json = [req.body.user_id];
 
-                    options.formData = { 
-                        files: { 
-                            value: data.licenseCode,
-                            options: { filename: fileName, contentType: null } 
-                        },
-                        channel_id: mattermostChannel 
-                    };
+                rp(options)
+                    .then(data => {
+                        const {username} = data[0];
+                        options.url = mattermostServer + '/api/v4/files';
+                        options.headers['Content-Type'] = 'multipart/form-data;';
+                        options.json = true;
 
-                    rp(options)
-                        .then(data => {
-                            const fileID = data.file_infos[0].id;
-                            options.headers['Content-Type'] = 'application/json';
-                            delete options.formData
-                            options.url = mattermostServer + '/api/v4/posts';
+                        options.formData = { 
+                            files: { 
+                                value: licenseCode,
+                                options: { filename: fileName, contentType: null } 
+                            },
+                            channel_id: mattermostChannel 
+                        };
 
-                            let additionOptionsText = '';
-                            const additionOptionsArray =  ['Variant Management', 'Document Review', 'Service Desk', 'Escalation', 'Branching', 'Doors bridge', 'Jira integration'];
-                            
-                            for (let index = 0; index < additionOptionsArray.length; index++) {
-                                if (submission.additionOptions[index].toLowerCase() === 't')
-                                    additionOptionsText += additionOptionsArray[index] + ', '
-                            }
+                        rp(options)
+                            .then(data => {
+                                const fileID = data.file_infos[0].id;
+                                options.headers['Content-Type'] = 'application/json';
+                                delete options.formData
+                                options.url = mattermostServer + '/api/v4/posts';
 
-                            additionOptionsText = additionOptionsText.slice(0, -2);
-                            
-                            options.json = {
-                                channel_id: mattermostChannel,
-                                file_ids: [fileID],
-                                props: {
-                                    attachments: [
-                                            {
-                                                title: submission.company + " 의 코드비머 라이센스 발급이 완료 되었습니다.",
-                                                fields: [
-                                                    {
-                                                        title: "만료일",
-                                                        value: submission.expiredDate,
-                                                        short: false
-                                                    },
-                                                    {
-                                                        title: "Named License 인원",
-                                                        value: submission.namedUser,
-                                                        short: true
-                                                    },
-                                                    {
-                                                        title: "Floating Licnese 인원",
-                                                        value: submission.floatingUser,
-                                                        short: true
-                                                    },
-                                                    {
-                                                        title: "Addtional Options",
-                                                        value: additionOptionsText,
-                                                        short: false
-                                                    }
-                                                ]
-                                            }
-                                        ]
+                                let additionOptionsText = '';
+                                const additionOptionsArray =  ['Variant Management', 'Document Review', 'Service Desk', 'Escalation', 'Branching', 'Doors bridge', 'Jira integration'];
+                                
+                                for (let index = 0; index < additionOptionsArray.length; index++) {
+                                    if (submission.additionOptions[index].toLowerCase() === 't')
+                                        additionOptionsText += additionOptionsArray[index] + ', '
                                 }
-                            }
 
-                            rp(options)
-                                .then(res => console.log(res))
-                                .catch(err => console.log(err));
-                        })
+                                additionOptionsText = additionOptionsText.slice(0, -2);
+                                
+                                options.json = {
+                                    message: `@seungwoo.yu @youngseon.kim @jingoo.kim ${username} 이 라이센스 발급을 신청하였습니다.`,
+                                    channel_id: mattermostChannel,
+                                    file_ids: [fileID],
+                                    props: {
+                                        attachments: [
+                                                {
+                                                    title: submission.company + " 의 코드비머 라이센스 발급이 완료 되었습니다.",
+                                                    fields: [
+                                                        {
+                                                            title: "라이센스 발급자",
+                                                            value: username,
+                                                            short: false
+                                                        },
+                                                        {
+                                                            title: "만료일",
+                                                            value: submission.expiredDate,
+                                                            short: false
+                                                        },
+                                                        {
+                                                            title: "Named License 인원",
+                                                            value: submission.namedUser,
+                                                            short: true
+                                                        },
+                                                        {
+                                                            title: "Floating Licnese 인원",
+                                                            value: submission.floatingUser,
+                                                            short: true
+                                                        },
+                                                        {
+                                                            title: "Addtional Options",
+                                                            value: additionOptionsText,
+                                                            short: false
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                    }
+                                }
+
+                                rp(options)
+                                    .then(res => console.log(res))
+                                    .catch(err => console.log(err));
+                            });
+                    });
             } 
             else {
                 const errorMessages = Object.values(data.fieldErrors).map(a => a + "\n").join().replace(/,/g, '');
@@ -227,7 +240,7 @@ app.post('/issued', (req, res) => {
                     .then(res => console.log(res))
                     .catch(err => console.log(err));
             }
-        })
+        });
 
     res.send();
 });
